@@ -2,44 +2,59 @@ import React, { Component} from 'react';
 import BookListItem from '../book-list-item';
 import './book-list.css'
 import {connect} from 'react-redux'
+import ErorIndicator from '../error-indicator'
 import { withBookstoreService } from '../hoc'
-import { booksLoaded } from '../../actions';
+import { fetchBooks, bookAdedToCart } from '../../actions';
 import  compose  from '../../utils';
-import {bindActionCreators} from 'redux';
+import Spinner from '../spinner';
 
-
-class BookList extends Component{
+class BookListContainer extends Component{
     componentDidMount(){
-        const { bookstoreService} = this.props;
-        const data = bookstoreService.getBooks();
-        console.log(data);
-        this.props.booksLoaded(data);
+        this.props.fetchBooks();
     }
     render(){
-        const {books} = this.props;
-        return(
-            <ul className="book-list">
-                {
-                    books.map((book, item)=>{
-                        return(
-                            <li key={item}><BookListItem book={book}/></li>
-                        )
-                    })
-                }
-            </ul>
-        );
+        const {books, loading, error, OnAddedToCart} = this.props;
+        if(loading){
+           return <Spinner />
+        }
+        if(error){
+            return <ErorIndicator />
+         }
+        return <BookList books={books} OnAddedToCart={OnAddedToCart}/>
+        
     }
 }
-const mapStateToProps = ({books})=>{
-    return {books};
+const mapStateToProps = ({books, loading, error})=>{
+    return {books, loading, error};
 }
 
-const mapDispatchToProps = {
-    booksLoaded
+const mapDispatchToProps = (dispatch, ownProps) => {
+    const { bookstoreService } = ownProps;
+    return{
+        fetchBooks: fetchBooks(bookstoreService, dispatch),
+        OnAddedToCart: (id)=> dispatch(bookAdedToCart(id))
+    }
 }
+    
+
+
 
 export default compose(
     withBookstoreService(),
     connect(mapStateToProps, mapDispatchToProps)
-)(BookList);
+)(BookListContainer);
 
+const BookList =({ books, OnAddedToCart})=>{
+    return(
+        <ul className="book-list">
+            {
+                books.map((book, item)=>{
+                    return(
+                        <li key={item}><BookListItem book={book} OnAddedToCart={() =>OnAddedToCart(book.id)}/></li>
+                    )
+                })
+            }
+        </ul>
+    )
+
+}
