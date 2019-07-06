@@ -9,7 +9,7 @@ const ShoppingCartTable = ({items, total, onIncrease,  onDecrease, onDelete}) =>
         const{id, name, count, total} = item;
         return(
             <tr key={id}>
-                <td>{idx}</td>
+                <td>{idx + 1}</td>
                 <td>{name}</td>
                 <td>{count}</td>
                 <td>${total}</td>
@@ -47,7 +47,7 @@ const ShoppingCartTable = ({items, total, onIncrease,  onDecrease, onDelete}) =>
     )
 }
 
-const mapStateToProps = ({ carItems, orderTotal}) =>{
+const mapStateToProps = ({shoppingCar: { carItems, orderTotal}}) =>{
     return{
         items: carItems,
         total:orderTotal
